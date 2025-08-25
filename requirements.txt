@@ -43,7 +43,13 @@ safetensors==0.6.2
 six==1.17.0
 sympy==1.14.0
 tokenizers==0.13.3
-torch==2.8.0
+# --- FIX: Explicitly specify CPU-only PyTorch ---
+# Remove the old 'torch==2.8.0' line and replace it with this:
+torch==2.8.0+cpu # Or use a direct wheel URL if this doesn't work, e.g., for Linux (CUDA 12.1):
+# torch@https://download.pytorch.org/whl/cpu/torch-2.8.0%2Bcpu-cp311-cp311-manylinux2014_x86_64.whl
+# Note: The exact URL depends on your Python version (cp311 for Python 3.11) and platform.
+# For Render's Python 3.11.4 on a standard Linux instance, `torch==2.8.0+cpu` should work.
+# -----------------------------------------------
 tqdm==4.67.1
 transformers==4.33.2
 typing_extensions==4.14.1
