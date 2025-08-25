@@ -27,7 +27,9 @@ mpmath==1.3.0
 multidict==6.6.4
 multiprocess==0.70.15
 networkx==3.2.1
-numpy==2.0.2
+# --- FIX: Explicitly set a compatible numpy version ---
+numpy==1.26.4
+# ----------------------------------------------------
 packaging==25.0
 pandas==2.3.2
 propcache==0.3.2
@@ -43,14 +45,9 @@ safetensors==0.6.2
 six==1.17.0
 sympy==1.14.0
 tokenizers==0.13.3
-# --- FIX: Using a stable CPU-compatible PyTorch version ---
-# This version is known to have CPU builds available via pip's default indexes.
 torch==2.3.1
-# -----------------------------------------------------------
 tqdm==4.67.1
-# --- FIX: Updated transformers for compatibility with PyTorch 2.3.1 ---
 transformers==4.42.0
-# --------------------------------------------------------------------
 typing_extensions==4.14.1
 tzdata==2025.2
 urllib3==2.5.0
