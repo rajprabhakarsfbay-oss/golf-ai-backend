@@ -2,7 +2,7 @@
 # SAN RAMON GOLF AI - BACKEND SERVER (app.py) - STABILITY FIX
 # =============================================================================
 from flask import Flask, request, jsonify
-from flask_cors import CORS 
+from flask_cors import CORS
 import sqlite3
 import json
 import re
@@ -11,7 +11,7 @@ import os
 import torch
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import logging
-import requests 
+import requests
 
 # --- Configuration ---
 logging.basicConfig(level=logging.INFO)
@@ -121,13 +121,22 @@ def gps_recommendation():
         distance = data.get('distance')
         lie = data.get('lie')
         hole = data.get('hole')
-        
-        prompt = f"""San Ramon Golf Course Hole {hole} Recommendation:
-        Distance: {distance} yards. Lie: {lie}.
-        Wind: {live_weather['wind']['speed']:.1f}mph from {live_weather['wind']['deg']} degrees.
-        Temp: {live_weather['main']['temp']:.1f}°F.
-        Recommend club:"""
-        
+
+        # --- FIX: Adding a try-except block to gracefully handle the prompt creation ---
+        try:
+            prompt = f"""San Ramon Golf Course Hole {hole} Recommendation:
+            Distance: {distance} yards. Lie: {lie}.
+            Wind: {live_weather['wind']['speed']:.1f}mph from {live_weather['wind']['deg']} degrees.
+            Temp: {live_weather['main']['temp']:.1f}°F.
+            Recommend club:"""
+        except KeyError as e:
+            logger.error(f"❌ Missing key in weather data: {e}. Cannot create AI prompt.")
+            return jsonify({"error": "Incomplete weather data received."}), 500
+        except TypeError as e:
+            logger.error(f"❌ Type error while creating prompt: {e}. One of the variables is None.")
+            return jsonify({"error": "Invalid data for AI prompt."}), 500
+        # --- END OF FIX ---
+
         logger.info(f"🧠 Asking trained AI: '{prompt}'")
 
         inputs = tokenizer.encode(prompt, return_tensors='pt', max_length=100, truncation=True)
@@ -136,7 +145,7 @@ def gps_recommendation():
                 inputs, max_length=inputs.shape[1] + 40, num_return_sequences=1,
                 temperature=0.4, pad_token_id=tokenizer.eos_token_id, do_sample=True
             )
-        
+
         full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
         insight = full_response[len(prompt):].strip().split('.')[0] + '.'
 
@@ -144,10 +153,10 @@ def gps_recommendation():
             "AI_recommended": extract_club_from_ai_text(insight),
             "recommendation": insight,
             "plays_like": distance, # Placeholder
-            "live_weather": live_weather 
+            "live_weather": live_weather
         }
         return jsonify(response_data)
-        
+
     except Exception as e:
         logger.error(f"GPS recommendation endpoint error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -164,11 +173,11 @@ def health_check():
 if __name__ == '__main__':
     print("🏌️ Golf AI Backend starting...")
     init_database()
-    
+
     if not load_trained_model():
         print("⚠️ WARNING: Trained model failed to load. AI recommendations will be unavailable.")
-    
+
     print("🚀 Golf AI Backend is running!")
     print(f"🔗 Frontend should connect via Render URL.")
-    
+
     app.run(host='0.0.0.0', port=5000, debug=True)
