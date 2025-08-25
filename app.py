@@ -1,5 +1,5 @@
 # =============================================================================
-# SAN RAMON GOLF AI - BACKEND SERVER (app.py) - FINAL VERSION
+# SAN RAMON GOLF AI - BACKEND SERVER (app.py) - STABILITY FIX
 # =============================================================================
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
@@ -18,7 +18,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-# This explicit CORS configuration is the most reliable way to handle browser requests.
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # --- Constants ---
@@ -107,6 +106,12 @@ def gps_recommendation():
     if request.method == 'OPTIONS':
         return '', 204
 
+    # *** NEW STABILITY CHECK ***
+    # Verify that the model is loaded before proceeding.
+    if not model or not tokenizer:
+        logger.error("❌ Model not loaded. Cannot generate recommendation.")
+        return jsonify({"error": "AI model is not available. Check server logs."}), 503
+
     try:
         live_weather = get_live_weather()
         if not live_weather:
@@ -164,6 +169,6 @@ if __name__ == '__main__':
         print("⚠️ WARNING: Trained model failed to load. AI recommendations will be unavailable.")
     
     print("🚀 Golf AI Backend is running!")
-    print(f"🔗 Frontend should connect via ngrok URL.")
+    print(f"🔗 Frontend should connect via Render URL.")
     
     app.run(host='0.0.0.0', port=5000, debug=True)
