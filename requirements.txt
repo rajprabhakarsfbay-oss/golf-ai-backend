@@ -43,11 +43,14 @@ safetensors==0.6.2
 six==1.17.0
 sympy==1.14.0
 tokenizers==0.13.3
-# --- FIX: Explicitly specify CPU-only PyTorch using direct wheel URL ---
-torch@https://download.pytorch.org/whl/cpu/torch-2.8.0%2Bcpu-cp311-cp311-manylinux2014_x86_64.whl
-# ---------------------------------------------------------------------
+# --- FIX: Using a stable CPU-compatible PyTorch version ---
+# This version is known to have CPU builds available via pip's default indexes.
+torch==2.3.1
+# -----------------------------------------------------------
 tqdm==4.67.1
-transformers==4.33.2
+# --- FIX: Updated transformers for compatibility with PyTorch 2.3.1 ---
+transformers==4.42.0
+# --------------------------------------------------------------------
 typing_extensions==4.14.1
 tzdata==2025.2
 urllib3==2.5.0
